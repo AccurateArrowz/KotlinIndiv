@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("kotlin-kapt") // 👈 Required for Room compile
 }
 
 android {
@@ -54,6 +55,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.androidx.androidx.room.gradle.plugin)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -76,5 +78,9 @@ dependencies {
 // for dark mode toggle persistence
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-
+    val room_version = "2.6.1"
+    //for Rooom (database)
+implementation("androidx.room:room-runtime:$room_version")
+implementation("androidx.room:room-ktx:$room_version")
+kapt("androidx.room:room-compiler:$room_version")
 }

@@ -1,1 +1,39 @@
-/build
+# Gradle files
+.gradle/
+build/
+**/build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log/OS files
+*.log
+*.swp
+.DS_Store
+
+# Android Studio/IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (if you want to keep it private)
+# Uncomment the next line if you don't want to commit google-services.json
+# app/google-services.json
+
+# Crashlytics/Fabric
+app/crashlytics-build.properties
+
+# Mac OS
+*.DS_Store
+
+
+# Misc
+captures/
+.externalNativeBuild/
+.cxx/
