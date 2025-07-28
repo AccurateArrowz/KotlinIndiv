@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import com.example.ecommerce.data.local.entities.CartItemEntity
 
 @Dao
 interface CartDao {

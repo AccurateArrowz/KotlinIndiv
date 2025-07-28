@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,7 +77,7 @@ fun MainScreen(navController: NavController, authViewModel: AuthViewModel) {
                             enabled = currentRoute != MainAppRoutes.INBOX
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Default.List, contentDescription = "Inbox")
+                                Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Inbox")
                                 Text("Inbox", color = MaterialTheme.colorScheme.onPrimary)
                             }
                         }

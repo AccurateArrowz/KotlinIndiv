@@ -83,6 +83,26 @@ class CartViewModel @Inject constructor(
         }
     }
 
+    fun addToCart(productId: String, quantity: Int) {
+        val userId = _uiState.value.currentUserId
+        if (userId == null) {
+            _uiState.value = _uiState.value.copy(error = "User not logged in.")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                cartRepository.addToCart(userId, productId, quantity)
+                // Reload cart to reflect the changes
+                loadCartForUser(userId)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = e.message ?: "Error adding item to cart"
+                )
+            }
+        }
+    }
+
     fun updateCartItemQuantity(cartItemId: Int, newQuantity: Int) {
         val userId = _uiState.value.currentUserId
         if (userId == null) {
@@ -157,3 +177,4 @@ class CartViewModelFactory @Inject constructor(
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
+}

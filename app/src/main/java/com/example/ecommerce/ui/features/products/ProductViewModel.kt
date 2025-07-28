@@ -31,7 +31,7 @@ class ProductViewModel @Inject constructor(
         loadProducts()
     }
 
-    private fun loadProducts() {
+    fun loadProducts() {
         viewModelScope.launch {
             try {
                 _uiState.value = _uiState.value.copy(isLoading = true)
@@ -63,21 +63,44 @@ class ProductViewModel @Inject constructor(
         val sampleProducts = listOf(
             ProductEntity(
                 id = "1",
-                name = "Sample Product 1",
-                description = "This is a sample product description.",
-                price = 29.99,
-                imageIdentifier = "sample_image_1",
-                category = "Sample Category"
+                name = "Smartphone",
+                description = "Latest smartphone with advanced features",
+                price = 599.99,
+                imageIdentifier = "https://via.placeholder.com/300x300?text=Smartphone",
+                category = "Electronics"
             ),
             ProductEntity(
                 id = "2",
-                name = "Sample Product 2",
-                description = "Another sample product description.",
-                price = 39.99,
-                imageIdentifier = "sample_image_2",
-                category = "Sample Category"
+                name = "Laptop",
+                description = "High-performance laptop for work and gaming",
+                price = 999.99,
+                imageIdentifier = "https://via.placeholder.com/300x300?text=Laptop",
+                category = "Electronics"
+            ),
+            ProductEntity(
+                id = "3",
+                name = "Headphones",
+                description = "Wireless noise-canceling headphones",
+                price = 199.99,
+                imageIdentifier = "https://via.placeholder.com/300x300?text=Headphones",
+                category = "Electronics"
+            ),
+            ProductEntity(
+                id = "4",
+                name = "T-Shirt",
+                description = "Comfortable cotton t-shirt",
+                price = 24.99,
+                imageIdentifier = "https://via.placeholder.com/300x300?text=T-Shirt",
+                category = "Clothing"
+            ),
+            ProductEntity(
+                id = "5",
+                name = "Sneakers",
+                description = "Stylish and comfortable sneakers",
+                price = 89.99,
+                imageIdentifier = "https://via.placeholder.com/300x300?text=Sneakers",
+                category = "Clothing"
             )
-            // Add more sample products as needed
         )
         
         productRepository.insertInitialProducts(sampleProducts)

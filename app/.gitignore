@@ -22,8 +22,7 @@ out/
 *.jks
 *.keystore
 
-# Google Services (if you want to keep it private)
-# Uncomment the next line if you don't want to commit google-services.json
+# Google Services 
 # app/google-services.json
 
 # Crashlytics/Fabric

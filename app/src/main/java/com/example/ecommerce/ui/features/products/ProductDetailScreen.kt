@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,18 +20,40 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.ecommerce.data.local.entities.ProductEntity
+import com.example.ecommerce.data.repository.ProductRepository
 import com.example.ecommerce.ui.features.cart.CartViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+// Added imports
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     productId: String,
     onBackClick: () -> Unit,
-    viewModel: ProductDetailViewModel = hiltViewModel(),
-    cartViewModel: CartViewModel = hiltViewModel()
+    viewModel: ProductDetailViewModel = hiltViewModel<ProductDetailViewModel>(),
+    cartViewModel: CartViewModel = hiltViewModel<CartViewModel>()
 ) {
     val productState by viewModel.productState.collectAsState()
     val cartState by cartViewModel.uiState.collectAsState()
@@ -47,7 +69,7 @@ fun ProductDetailScreen(
                 title = { Text("Product Details") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -114,71 +136,237 @@ fun ProductDetailScreen(
 }
 
 @Composable
-private fun ProductDetailContent(
+fun ProductDetailContent(
     product: ProductEntity,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    var selectedImage by remember { mutableStateOf(product.imageIdentifier) }
+    
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
     ) {
-        // Product Image
-        val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(product.imageIdentifier)
-                .crossfade(true)
-                .build(),
-            placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
-            error = painterResource(id = android.R.drawable.ic_dialog_alert)
-        )
-        
-        Image(
-            painter = painter,
-            contentDescription = product.name,
+        // Main Product Image
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
-                .padding(8.dp),
-            contentScale = ContentScale.Fit
-        )
+                .height(350.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+        ) {
+            // Main product image with zoom capability
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = selectedImage,
+                    error = null
+                ),
+                contentDescription = product.name,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+            )
+            
+            // Image gallery (horizontal scroll for multiple images)
+            // For now, we're using the same image, but you can extend this to show multiple images
+            if (false) { // Set to true if you have multiple images
+                LazyRow(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(listOf(product.imageIdentifier)) { imageUrl ->
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(
+                                    width = if (selectedImage == imageUrl) 2.dp else 0.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable { selectedImage = imageUrl }
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(model = imageUrl, error = null),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Product Info Section
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Product Name and Price
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = product.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Text(
+                    text = "$${String.format("%.2f", product.price)}",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Category Chip
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AssistChip(
+                    onClick = { /* Navigate to category */ },
+                    label = { Text(product.category) },
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                
+                // Rating (you can add actual rating logic)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Rating",
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "4.8",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Text(
+                        text = " (128)",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Description Section
+            Text(
+                text = "Description",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = product.description,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = 24.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Features/Highlights
+            Text(
+                text = "Highlights",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Sample features - you can customize this based on your product data
+            val features = listOf(
+                "Premium quality materials",
+                "1-year manufacturer warranty",
+                "Free shipping on all orders",
+                "Easy returns within 30 days"
+            )
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                features.forEach { feature ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = feature,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+        }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Product Name
-        Text(
-            text = product.name,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Product Price
-        Text(
-            text = "$${String.format("%.2f", product.price)}",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Product Category
-        Text(
-            text = "Category: ${product.category}",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Product Description
-        Text(
-            text = product.description,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        // Add bottom padding for the FAB
+        Spacer(modifier = Modifier.height(80.dp))
+    }
+    
+    // Add to Cart Button (FAB)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .navigationBarsPadding()
+            .imePadding(),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FloatingActionButton(
+            onClick = { 
+                // Handle add to cart
+                // cartViewModel.addToCart(...)
+            },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .height(48.dp)
+                .width(200.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = "Add to Cart",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Add to Cart",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
     }
 }
 
