@@ -22,6 +22,7 @@ object MainAppRoutes {
     const val INBOX = "inbox"
     const val BASKET = "basket"
     const val ACCOUNT = "account"
+    const val CHECKOUT = "checkout"
 }
 
 @Composable
@@ -43,7 +44,7 @@ fun AppNavHost(
         }
 
         composable(AppRoutes.HOME) {
-            androidx.compose.material3.Text(text = "Welcome to the Ecommerce App! You are logged in.")
+            com.example.ecommerce.screens.MainScreen(navController = navController, authViewModel = authViewModel)
         }
     }
 }

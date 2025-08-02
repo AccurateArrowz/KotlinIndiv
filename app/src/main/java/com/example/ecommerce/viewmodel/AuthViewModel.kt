@@ -27,6 +27,9 @@ class AuthViewModel : ViewModel() {
 
     val authState: StateFlow<AuthResult> = _authState
 
+    private val _logoutResult = MutableStateFlow<AuthResult>(AuthResult.Idle)
+    val logoutResult: StateFlow<AuthResult> = _logoutResult
+
     fun login(email: String, password: String) {
         _authState.value = AuthResult.Loading
         viewModelScope.launch {
@@ -73,4 +76,18 @@ class AuthViewModel : ViewModel() {
     fun resetAuthState() {
         _authState.value = AuthResult.Idle
     }
+
+    fun logout() {
+        _logoutResult.value = AuthResult.Loading
+        viewModelScope.launch {
+            try {
+                auth.signOut()
+                _logoutResult.value = AuthResult.Success
+            } catch (e: Exception) {
+                _logoutResult.value = AuthResult.Error(e.message ?: "Logout failed.")
+            }
+        }
+    }
+
+    fun getCurrentUser() = auth.currentUser
 }

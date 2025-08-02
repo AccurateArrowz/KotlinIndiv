@@ -38,10 +38,13 @@ import com.example.ecommerce.navigation.AppRoutes
 import com.example.ecommerce.navigation.MainAppRoutes
 import com.example.ecommerce.viewmodel.AuthResult
 import com.example.ecommerce.viewmodel.AuthViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ecommerce.viewmodel.BasketViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavController, authViewModel: AuthViewModel) {
+    val basketViewModel: BasketViewModel = viewModel()
     val innerNavController = rememberNavController()
     val currentBackStackEntry by innerNavController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
@@ -112,17 +115,25 @@ fun MainScreen(navController: NavController, authViewModel: AuthViewModel) {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(MainAppRoutes.HOME_CONTENT) {
-                HomeScreen()
+                HomeScreen(basketViewModel = basketViewModel)
             }
-//            composable(MainAppRoutes.INBOX) {
-//                InboxScreen()
-//            }
-//            composable(MainAppRoutes.BASKET) {
-//                BasketScreen()
-//            }
-//            composable(MainAppRoutes.ACCOUNT) {
-//                AccountScreen(authViewModel = authViewModel)
-//            }
+            composable(MainAppRoutes.INBOX) {
+                InboxScreen()
+            }
+            composable(MainAppRoutes.BASKET) {
+                BasketScreen(navController = innerNavController, basketViewModel = basketViewModel)
+            }
+            composable(MainAppRoutes.ACCOUNT) {
+                // Pass the main NavController for logout navigation
+                AccountScreen(navController = navController, authViewModel = authViewModel)
+            }
+            composable(MainAppRoutes.CHECKOUT) {
+                CheckoutScreen(basketViewModel = basketViewModel, onCheckoutSuccess = {
+                    innerNavController.navigate(MainAppRoutes.HOME_CONTENT) {
+                        popUpTo(MainAppRoutes.HOME_CONTENT) { inclusive = true }
+                    }
+                })
+            }
         }
     }
 }

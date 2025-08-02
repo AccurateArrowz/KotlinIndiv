@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kotlinindividual"
+    namespace = "com.example.ecommerce"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.kotlinindividual"
+        applicationId = "com.example.ecommerce"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
