@@ -34,7 +34,7 @@ fun SplashScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Ecommerce App",
+            text = "OrderOnline",
             style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(16.dp)

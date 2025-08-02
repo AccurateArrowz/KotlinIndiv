@@ -30,20 +30,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.ecommerce.R
+import androidx.compose.ui.res.painterResource
+import coil.compose.rememberAsyncImagePainter
 
-data class FoodItem(val id: Int, val name: String, val description: String, val price: String, val imageUrl: String)
+import androidx.annotation.DrawableRes
+
+data class FoodItem(
+    val id: Int,
+    val name: String,
+    val description: String,
+    val price: String,
+    val imageUrl: String? = null,
+    @DrawableRes val imageRes: Int? = null
+) // imageUrl for remote, imageRes for local
 
 
 @Composable
 fun HomeScreen(basketViewModel: com.example.ecommerce.viewmodel.BasketViewModel = viewModel()) {
     val sampleFoodItems = listOf(
-        FoodItem(1, "Classic Burger", "Juicy beef patty, lettuce, tomato, cheese.", "$12.99", "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&q=80"),
-        FoodItem(2, "Margherita Pizza", "Fresh mozzarella, basil, tomato sauce.", "$15.00", "https://images.unsplash.com/photo-1598021680135-2d83e3a3e462?w=500&q=80"),
-        FoodItem(3, "Caesar Salad", "Crisp romaine, croutons, parmesan, Caesar dressing.", "$9.50", "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=500&q=80"),
-        FoodItem(4, "Spicy Chicken Tacos", "Grilled chicken, salsa, avocado, spicy mayo.", "$11.75", "https://images.unsplash.com/photo-1565299589934-3c0415735167?w=500&q=80"),
-        FoodItem(5, "Vegetable Biryani", "Fragrant basmati rice with mixed vegetables.", "$14.00", "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=500&q=80"),
-        FoodItem(6, "Sushi Combo", "Assortment of fresh nigiri and maki rolls.", "$22.00", "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=500&q=80"),
-        FoodItem(7, "Pad Thai", "Stir-fried noodles with shrimp, peanuts, and bean sprouts.", "$13.50", "https://images.unsplash.com/photo-1623879540659-530127b95135?w=500&q=80")
+        FoodItem(1, "Classic Burger", "Juicy beef patty, lettuce, tomato, cheese.", "$12.99", imageUrl = "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=500&q=80"),
+        FoodItem(2, "Margherita Pizza", "Fresh mozzarella, basil, tomato sauce.", "$15.00", imageRes = R.drawable.pizza),
+        FoodItem(3, "Caesar Salad", "Crisp romaine, croutons, parmesan, Caesar dressing.", "$9.50", imageUrl = "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=500&q=80"),
+        FoodItem(4, "Spicy Chicken Tacos", "Grilled chicken, salsa, avocado, spicy mayo.", "$11.75", imageRes = R.drawable.chicken_tacos),
+        FoodItem(5, "Vegetable Biryani", "Fragrant basmati rice with mixed vegetables.", "$14.00", imageUrl = "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=500&q=80"),
+        FoodItem(6, "Sushi Combo", "Assortment of fresh nigiri and maki rolls.", "$22.00", imageUrl = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=500&q=80"),
+        FoodItem(7, "Pad Thai", "Stir-fried noodles with shrimp, peanuts, and bean sprouts.", "$13.50", imageRes = R.drawable.pad_thai)
     )
 
     Column(
@@ -77,14 +89,25 @@ fun FoodItemCard(item: FoodItem, onAddItem: (FoodItem) -> Unit) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(item.imageUrl),
-                contentDescription = item.name,
-                modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 12.dp),
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop
-            )
+            if (item.imageRes != null) {
+                Image(
+                    painter = painterResource(id = item.imageRes),
+                    contentDescription = item.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(end = 12.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            } else if (item.imageUrl != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(item.imageUrl),
+                    contentDescription = item.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(end = 12.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = item.name, style = MaterialTheme.typography.titleMedium)
                 Text(

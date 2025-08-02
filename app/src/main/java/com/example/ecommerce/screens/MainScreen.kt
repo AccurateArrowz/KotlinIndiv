@@ -53,7 +53,7 @@ fun MainScreen(navController: NavController, authViewModel: AuthViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ecommerce App") },
+                title = { Text("OrderOnline") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
